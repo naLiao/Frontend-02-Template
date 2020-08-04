@@ -53,14 +53,12 @@ ${this.bodyText}`
                     host: this.host,
                     port: this.port
                 }, () => {
-                    console.log('request: ', this.toString());
                     connection.write(this.toString())
                 });
             }
 
             // 将接收到的数据传入parser
             connection.on('data', data => {
-                console.log('res: ', data.toString());
                 parser.receive(data.toString())
                 // 接收完成
                 if (parser.isFinished) {
@@ -272,5 +270,4 @@ void async function () {
     let response = await request.send()
 
     let dom = parser.parseHTML(response.body)
-    console.log('dom: ', dom);
 }();
