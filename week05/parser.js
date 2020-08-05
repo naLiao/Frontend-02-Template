@@ -1,8 +1,40 @@
 const css = require('css')
 
+const EOF = Symbol('EOF')
+
+const layout = require('./layout.js')
+
 let currentToken = null
 let stack = [{ type: "document", children: [] }]
 let currentTextNode = null
+
+function specificity(selector) {
+    let p = [0, 0, 0, 0]
+    let selectorParts = selector.split(' ')
+    for (let part of selectorParts) {
+        if (part.charAt(0) == '#') {
+            p[1] += 1
+        } else if (part.charAt(0) == '.') {
+            p[2] += 1
+        } else {
+            p[3] += 1
+        }
+        return p
+    }
+}
+
+function compare(sp1, sp2) {
+    if (sp1[0] - sp2[0]) {
+        return sp1[0] - sp2[0]
+    }
+    if (sp1[1] - sp2[1]) {
+        return sp1[1] - sp2[1]
+    }
+    if (sp1[2] - sp2[2]) {
+        return sp1[2] - sp2[2]
+    }
+    return sp1[3] - sp2[3]
+}
 
 function match(element, selector) {
     // console.log('element------------------: ', element, selector, '-------------------------------'); // element------------------:  {
@@ -70,16 +102,20 @@ function computeCSS(element) {
         }
         // 计算computedStyle属性
         if (matched) {
-            // console.log("Element", element, "matched rule", rule)
+            let sp = specificity(rule.selectors[0])
             let declarations = rule.declarations
-            // console.log('declarations: ', declarations);
             for (let declaration of declarations) {
                 if (!element.computedStyle[declaration.property]) {
                     element.computedStyle[declaration.property] = {}
                 }
-                element.computedStyle[declaration.property].value = declaration.value
+                if (!element.computedStyle[declaration.property].specificity) {
+                    element.computedStyle[declaration.property].value = declaration.value
+                    element.computedStyle[declaration.property].specificity = sp
+                } else if (compare(element.computedStyle[declaration.property].specificity, sp) < 0) {
+                    element.computedStyle[declaration.property].value = declaration.value
+                    element.computedStyle[declaration.property].specificity = sp
+                }
             }
-            console.log(element.computedStyle)
         }
     }
 }
@@ -109,7 +145,7 @@ function emit(token) {
         computeCSS(element)
 
         topElement.children.push(element)
-        element.parent = topElement
+        element.parent = JSON.parse(JSON.stringify(topElement))
 
         if (!token.isSelfClosing) {
             stack.push(element)
@@ -127,6 +163,9 @@ function emit(token) {
             if (topElement.tagName === 'style') {
                 addCSSRules(topElement.children[0].content)
             }
+
+            layout(topElement)
+
             stack.pop()
         }
         currentTextNode = null
@@ -146,8 +185,6 @@ function emit(token) {
         }
     }
 }
-
-const EOF = Symbol('EOF')
 
 // 识别数据
 function data(c) {
