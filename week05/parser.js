@@ -73,6 +73,8 @@ function computeCSS(element) {
     // 父元素序列，最内元素排到最前面，['myidElement', divElement,  xxxElement, divElement, body, html]
     var elements = stack.slice().reverse()
     // console.log('elements: ', elements);
+    if (rules.length === 0) return
+
     if (!element.computedStyle) {
         element.computedStyle = {}
     }
