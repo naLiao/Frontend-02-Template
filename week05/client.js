@@ -2,6 +2,8 @@
 const net = require('net')
 const parser = require('./parser')
 
+const images = require('images')
+
 class Request {
     constructor(config) {
         // 整理传入的参数，给默认值
@@ -271,4 +273,32 @@ void async function () {
 
     let dom = parser.parseHTML(response.body)
     // console.log(JSON.stringify(dom, null, '  '));
+
+    let viewport = images(800, 600)
+
+    render(viewport, dom[0])
+
+    viewport.save('viewport.jpg')
 }();
+
+function render(viewport, element) {
+    if (element.style) {
+        var img = images(element.style.width, element.style.height)
+
+        if (element.style['background-color']) {
+            let color = element.style['background-color'] || 'rgb(0,0,0)'
+            console.log('color: ', color);
+            color.match(/rgb\((\d+), (\d+), (\d+)\)/)
+            img.fill(Number(RegExp.$1), Number(RegExp.$2), Number(RegExp.$3))
+            viewport.draw(img, element.style.left || 0, element.style.top || 0)
+        }
+
+        viewport.save('viewport.jpg')
+    }
+
+    if (element.children) {
+        for (let child of element.children) {
+            render(viewport, child)
+        }
+    }
+}

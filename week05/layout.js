@@ -137,7 +137,7 @@ function layout(element) {
     let flexLines = [flexLine]
     // 剩余空间
     let mainSpace = elementStyle[mainSize]
-    let crossSpace = 0
+    var crossSpace = 0
 
     for (let i = 0; i < items.length; i++) {
         let item = items[i]
@@ -220,7 +220,7 @@ function layout(element) {
     } else {
         flexLines.forEach(flexLineItems => {
             let flexTotal = 0
-            console.log('flexLineItems: ', flexLineItems);
+            // console.log('flexLineItems: ', flexLineItems);
 
             // 计算flexTotal
             for (let i = 0; i < flexLineItems.length; i++) {
@@ -239,8 +239,8 @@ function layout(element) {
                     let item = flexLineItems[i]
                     let itemStyle = getStyle(item)
 
-                    let scale = itemStyle[flex] / flexTotal
-                    if (itemStyle[flex]) {
+                    let scale = itemStyle.flex / flexTotal
+                    if (itemStyle.flex) {
                         itemStyle[mainSize] = mainSpace * scale
                     }
                     itemStyle[mainStart] = currentMain
@@ -303,7 +303,7 @@ function layout(element) {
         crossBase = 0
     }
 
-    // 计算每一行
+    // 计算每一行的交叉轴尺寸
     let lineSize = style[crossSize] / flexLines.length
 
     let step
@@ -315,6 +315,59 @@ function layout(element) {
         crossBase += crossSign * crossSpace
         step = 0
     }
+    if (style.alignContent === 'center') {
+        crossBase += crossSign * crossSpace / 2
+        step = 0
+    }
+    if (style.alignContent === 'space-between') {
+        crossBase += 0
+        step = crossSpace / (flexLines.length - 1)
+    }
+    if (style.alignContent === 'space-around') {
+        step = crossSpace / (flexLines.length)
+        crossBase += crossSign * step / 2
+    }
+    if (style.alignContent === 'stretch') {
+        step = 0
+        crossBase += 0
+    }
+    flexLines.forEach(items => {
+        var lineCrossSize = style.alignContent === 'stretch' ?
+            items.crossSpace + crossSpace / flexLines.length :
+            items.crossSpace
+
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i]
+            let itemStyle = getStyle(item)
+
+            // 子元素优先，子元素没有设置用父元素
+            let align = itemStyle.alignSelf || style.alignItems
+
+            if (itemStyle[crossSize] === null) {
+                itemStyle[crossSize] = (align === 'stretch') ?
+                    lineCrossSize : 0
+            }
+            if (align === 'flex-start') {
+                itemStyle[crossStart] = crossBase
+                itemStyle[crossEnd] = itemStyle[crossStart] + crossSign * itemStyle[crossSize]
+            }
+            if (align === 'flex-end') {
+                itemStyle[crossStart] = crossBase + crossSign * lineCrossSize
+                itemStyle[crossEnd] = itemStyle[crossStart] - crossSign * itemStyle[crossSize]
+            }
+            if (align === 'center') {
+                itemStyle[crossStart] = crossBase + crossSign * (lineCrossSize - itemStyle[crossSize]) / 2
+                itemStyle[crossEnd] = itemStyle[crossStart] + crossSign * itemStyle[crossSize]
+            }
+            if (align === 'strecth') {
+                itemStyle[crossStart] = crossBase
+                itemStyle[crossEnd] = crossBase[crossStart] + crossSign * itemStyle[crossSize]
+
+                itemStyle[crossSize] = crossSign * (itemStyle[crossSize])
+            }
+        }
+        crossBase += crossSign * (lineCrossSize + step)
+    })
 }
 
 module.exports = layout
