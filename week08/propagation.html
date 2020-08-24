@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .box-container {
+            width: 100%;
+            height: 500px;
+            background-color: blue;
+        }
+
+        .box1 {
+            width: 80%;
+            height: 300px;
+            background-color: pink;
+        }
+
+        .box2 {
+            width: 60%;
+            height: 100px;
+            background-color: aqua;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box-container">
+        <div class="box1">
+            <div class="box2"></div>
+        </div>
+    </div>
+    <script>
+        let firstBox = document.querySelector('.box-container')
+        let secondBox = document.querySelector('.box1')
+        let thirdBox = document.querySelector('.box2')
+
+        firstBox.addEventListener('click', ev => {
+            console.log('firstBox冒泡: ', ev);
+        })
+
+        secondBox.addEventListener('click', ev => {
+            console.log('secondBox冒泡: ', ev);
+        })
+
+        firstBox.addEventListener('click', ev => {
+            console.log('firstBox捕获: ', ev);
+        }, true)
+
+        secondBox.addEventListener('click', ev => {
+            console.log('secondBox捕获: ', ev);
+        }, true)
+
+        thirdBox.addEventListener('click', ev => {
+            console.log('thirdBox捕获: ', ev);
+            ev.stopPropagation()
+        }, true)
+
+        thirdBox.addEventListener('click', ev => {
+            console.log('thirdBox冒泡: ', ev);
+        })
+    </script>
+</body>
+
+</html>
