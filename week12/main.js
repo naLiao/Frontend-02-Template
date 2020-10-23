@@ -1,47 +1,35 @@
-function createElement(type, attributes, ...children) {
-    console.log('type: ', type);
-    console.log('attributes: ', attributes);
-    console.log('children: ', children);
-    let element;
+import { Component, createElement } from './framework.js'
 
-    if (typeof type === 'string')
-        element = document.createElement(type)
-    else
-        element = new type
-
-    for (let attr in attributes) {
-        element.setAttribute(attr, attributes[attr])
-    }
-    for (let child of children) {
-        if (typeof child === 'string') {
-            child = document.createTextNode(child)
-        }
-        element.appendChild(child)
-    }
-
-    return element
-}
-
-class Div {
+class Carousel extends Component {
     constructor() {
-        this.root = document.createElement('div')
-        return this.root
+        super()
+        this.attributes = Object.create(null)
     }
 
     setAttribute(key, value) {
-        this.root.setAttribute(key, value)
+        this.attributes[key] = value
     }
-    appendChild(child) {
-        console.log('child: ', child);
-        this.root.appendChild(child)
+
+    render() {
+        this.root = document.createElement('div')
+        this.root.classList.add('carousel')
+        console.log('this.attributes: ', this.attributes);
+
+        // d.forEach(item => {
+        //     let div = createElement('div')
+        //     div.backgroundImage = item
+        //     div.mountTo(carousel)
+        // })
+        return this.root
     }
 }
 
-let a = <Div id="app">
-    <span>1</span>
-    <span>2</span>
-    <span>3</span>
-</Div>
+let d = [
+    "./assets/images/bg_1.jpg",
+    "./assets/images/bg_2.jpg",
+    "./assets/images/bg_3.jpg",
+    "./assets/images/bg_4.jpg"
+]
 
-document.body.appendChild(a)
-console.log('a: ', a);
+let a = <Carousel src={d} />
+a.mountTo(document.body)
