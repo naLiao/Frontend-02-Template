@@ -41,7 +41,8 @@ module.exports = class extends Generator {
         // 安装项目依赖
         this.yarnInstall(["vue"], { 'save-dev': false });
         this.yarnInstall(["webpack", "webpack-cli", "copy-webpack-plugin",
-            "vue-template-compiler", "style-loader", "css-loader", "vue-loader"], { 'save-dev': true });
+            "vue-template-compiler",
+            "ts-loader", "style-loader", "css-loader", "vue-loader"], { 'save-dev': true });
 
         // 复制模板
         this.fs.copyTpl(
@@ -60,6 +61,10 @@ module.exports = class extends Generator {
             this.templatePath('index.html'),
             this.destinationPath('src/index.html'),
             { title: answers.name }
+        )
+        this.fs.copyTpl(
+            this.templatePath('router.ts'),
+            this.destinationPath('router/index.ts')
         )
     }
 }
